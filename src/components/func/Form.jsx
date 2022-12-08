@@ -1,28 +1,38 @@
-import {useState} from 'react'
+import {useState, useEffect, memo} from 'react'
+import { Child } from './components/Child'
+import { Button } from './ui/Button'
 
-import styles from './Form.module.css'
+export const Form = (props) => {
+  const [change, setChange] = useState('')
+  const [img, setImg] = useState('')
+  const [clisk, setClick] = useState('')
+  const [inputs, setInput] = useState('')
+  let data = `${new Date().getDate()}.${new Date().getMonth()+1}.${new Date().getFullYear()}  
+              ${new Date().getHours()}:${new Date().getMinutes()}:${new Date().getSeconds()}`
 
-export function Form(props){
-    const [count, setCount] = useState(0);
-    const [name, setName] = useState('gb');
+  
 
-    const handleClick = () => {
-        setCount(count+1);
-    }
 
-    const handleChange = (event) => {
-        setName(event.target.value);
-    }
+  const handleChange = (event) => {
+    setChange(event.target.value)
+  }
 
-    // console.log('style', styles);
-    return (
-        <>
-    <h1 style={{color: 'yellow'}}>{props.title}</h1>
-    <h2 className ={styles.border}>Name: {name}</h2>
-    <input type="text" onChange={handleChange} />
-    <p>Count: {count}</p>
-    <button onClick={handleClick}>Click</button>
-    <hr/>
+  const handleInputs = (event) => {
+    setInput(event.target.value)
+  }
+
+  const handleImg = () => {
+    setClick()
+  }
+
+  const handleButton = () => {
+    props.setUserVith(change, data, img, inputs);
+  }
+
+  return (
+    <>
+      <Button setWin = {props.setList} setName = {handleChange} setImg = {handleImg} 
+        setText = {handleInputs} setUp = {handleButton}/>
     </>
-    );
+  )
 }

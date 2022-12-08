@@ -1,32 +1,43 @@
-// Импортируем библиотеку Реакт, класс компонент
 import React, { Component } from 'react'
+import {Child} from './components/Child'
 
-// Экспорт класса Форма, наследование от Компонентс
-export class Form extends Component{
+export class Form extends Component {
 
-    state={
-        name: 'Bibo',
-        count: 0
-    }
+  state = {
+    name: 'Biba',
+    count: 0,
+    show: true
+  }
 
-    handleChange(event){
-        this.setState({ name: event.target.value})
-    }
+  handleChange = (event) => {
+    // console.log(event.target.value)
+    this.setState({ name: event.target.value })
+  }
 
-    handlClick = () => {
-        this.setState({ count: this.state.count + 1})
-    }
+  handleClick = (event) => {
+    // console.log(event.target.value)
+    this.setState({ count: this.state.count + 1 })
+    // this.setState((prevState) => ({ count: prevState.count + 1 }))
+  }
 
-    render(){
-        return(
-            <>
-            <h1>Classes component</h1>
-            <h2>Name: {this.state.name}</h2>
-            <input type="text" onChange={this.handleChange.bind(this)} />
-            <p>Count: {this.state.count}</p>
-            <button onClick={this.handlClick}>Click</button>
-            <hr/>
-            </>
-        )
-    }
+  handleShow = () => {
+    this.setState({ show: this.state.show })
+  }
+
+  componentDidMount(){
+    console.log('Form did mount')
+  }
+
+  render () {
+    return (
+      <>
+        <h1>Classes Component</h1>
+        {/* <h2>Name: {this.state.name}</h2>
+        <input type="text" onChange={this.handleChange} />
+        <p>COUNT: {this.state.count}</p> */}
+        <button onClick={this.handleShow}>Show</button> 
+        {this.state.show && <Child />}
+      </>
+    )
+  }
 }
