@@ -1,38 +1,75 @@
-import { useState, useEffect } from 'react'
-import { Form as FormFunc } from './components/func/Form'
-import './css/style.css'
+import { Routes, Route } from 'react-router-dom'
+import { nanoid } from 'nanoid'
+
+import { Header } from './components/Header/Header'
+import { MainPage } from './pages/MainPage'
+import { ProfilePage } from './pages/ProfilePage'
+import { ChatsPage } from './pages/ChatsPage/ChatsPage'
+import { ChatList } from './components/ChatList/ChatList'
+import { useState } from 'react'
+import { defaultContext, ThemeContext } from './utils/ThemeContext'
+import { Provider } from 'react-redux'
+import { store } from './store'
+
+import { ThemeProvider, createTheme } from '@mui/material/styles';
+import CssBaseline from '@mui/material/CssBaseline';
+
+const degaultMessges = {
+  default: [
+    {
+      author: 'user',
+      text: 'one text'
+    },
+    {
+      author: 'user',
+      text: 'two text'
+    },
+  ]
+}
 
 export function App () {
-  const [messageList, setMessageList] = useState([{autor: '', date: '', text: ''}])
-  const ret = document.querySelector('p')
+  const [messages, setMessages] = useState(degaultMessges)
+  const [theme, setTheme] = useState(defaultContext.theme)
 
-    const setUser = (nam, dat, imag, textet) =>{
-      setMessageList([{autor: nam, date: dat, text: textet}])}
-      
-useEffect(() => {
-console.log("App did mounted")
-if(messageList[0].autor){
-  ret.insertAdjacentHTML('beforeend', messageList.map( (item) => 
-  ('<div class="use_widdow">' + '<p class="dia">' + '<span class="title_use">' 
-  + item.autor +' ' + item.date + '</span>' + '<br class="br_use"/>' 
-  + item.text + '</p>' +'</div>')).join(" "))
-  
-  setTimeout(() =>{
-    ret.insertAdjacentHTML('beforeend', `<div class="robo_window"> <p class="robo_win"> 
-    <span class ="title_robo">Administrator ${messageList[0].date} </span> 
-    <br>Ваш запрос обрабатывается.</p></div> `)
-  }, 5000)  
-}
-}, [messageList])
+
+  const toggleTheme = () => {
+    setTheme(theme === 'light' ? 'dark' : 'light')
+  }
+
+  const darkTheme = createTheme({
+    palette: {
+      mode: 'dark',
+    },
+  })
 
   return (
-    <div className='full_window'>
-    <div className='windo'>
-      <p></p>
-    </div>
-      <FormFunc setUserVith ={setUser} setList = {messageList}/>
-    </div>
+    <>
+      {/* <Header /> */}
+      <Provider store={store}>
+      <ThemeProvider theme={darkTheme}>
+      <CssBaseline />
+        <ThemeContext.Provider value={{
+          theme,
+          toggleTheme
+        }}>
+          <Routes>
+            <Route path='/' element={<Header />}>
+              <Route index element={<MainPage />} />
+              <Route path="profile" element={<ProfilePage />} />
+              <Route path="chats">
+                <Route index element={<ChatList />} />
+                <Route
+                  path=":chatId"
+                  element={<ChatsPage />}
+                />
+              </Route>
+            </Route>
+
+            <Route path="*" element={<h2>404 Page not FOUND</h2>} />
+          </Routes>
+        </ThemeContext.Provider>
+        </ThemeProvider>
+      </Provider>
+    </>
   )
 }
-
-// export default App
