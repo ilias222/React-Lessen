@@ -18,8 +18,11 @@ export const addMessage = (chatName, text, name) => ({
   type: ADD_MESSAGE,
   payload: {chatName, text, name}
 })
-
-export const addMessageBot = (chatName, text) => ({
-  type: ADD_MESSAGE_BOT,
-  payload: {chatName, text}
-})
+let botTimes
+ export const thunk = (chatName, text, message) => (dispath) => {
+   dispath(addMessage(chatName, text, message))
+   if (message !== 'bot'){
+    clearTimeout(botTimes)
+     botTimes = setTimeout(() => {dispath(addMessage(chatName, text = 'Я сдесь', message = 'bot'))}, 3000)
+   } 
+ }

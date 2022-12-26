@@ -26,27 +26,22 @@ export function ChatList() {
   return (
     <>
       
-      <List
-        sx={{ width: '100%', maxWidth: 360, bgcolor: 'background.paper' }}
-        aria-label="contacts"
-      >
-        <ul>
-            <ListItem disablePadding>
-          <ListItemButton >
-          {chats.map((chat) => (
-          <li key={chat.id}>
-            <Link to={`/chats/${chat.name}`}>
-            <ListItemIcon>
-            <ListItemText primary={chat.name} />
-            </ListItemIcon>
-            </Link>
-            <button onClick={() => dispatch(deleteChat(chat.name))}>X</button>
-            </li>
-            ))}
-          </ListItemButton>
-        </ListItem>
-        </ul>
-        </List>
+      
+          <ul>
+              
+                  {chats.map((chat) => (
+                    <li key={chat.id}>
+                      <Link to={`/chats/${chat.name}`}>
+                        
+                        {chat.name} 
+                        
+                      </Link>
+                      <button onClick={() => dispatch(deleteChat(chat.name))}>X</button>
+                    </li>
+                  ))}
+              
+          </ul>
+        
       
 
       <h1>ChatList</h1>

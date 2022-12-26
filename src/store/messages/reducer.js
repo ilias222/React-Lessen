@@ -37,7 +37,7 @@ export const messagesReducer = (state = initailState, action) => {
             author: payload.name,
             text: payload.text
           }
-        ],
+      ],
       }
 
       case ADD_MESSAGE_BOT:

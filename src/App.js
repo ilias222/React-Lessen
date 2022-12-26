@@ -1,5 +1,6 @@
 import { Routes, Route } from 'react-router-dom'
 import { nanoid } from 'nanoid'
+import { PersistGate } from 'redux-persist/integration/react'
 
 import { Header } from './components/Header/Header'
 import { MainPage } from './pages/MainPage'
@@ -9,7 +10,7 @@ import { ChatList } from './components/ChatList/ChatList'
 import { useState } from 'react'
 import { defaultContext, ThemeContext } from './utils/ThemeContext'
 import { Provider } from 'react-redux'
-import { store } from './store'
+import { store, persistor } from './store'
 
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -46,6 +47,7 @@ export function App () {
     <>
       {/* <Header /> */}
       <Provider store={store}>
+        <PersistGate persistor={persistor}>
       <ThemeProvider theme={darkTheme}>
       <CssBaseline />
         <ThemeContext.Provider value={{
@@ -69,6 +71,7 @@ export function App () {
           </Routes>
         </ThemeContext.Provider>
         </ThemeProvider>
+        </PersistGate>
       </Provider>
     </>
   )
