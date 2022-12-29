@@ -1,6 +1,7 @@
 import { createStore, compose, combineReducers, applyMiddleware } from 'redux'
 import { profileReducer } from './profile/reducer'
 import { messagesReducer } from './messages/reducer'
+import { gallireyReducer } from './gallirey/reducer'
 import thunk from 'redux-thunk'
 import { persistStore, persistReducer } from 'redux-persist'
 import storage from 'redux-persist/lib/storage'
@@ -14,7 +15,8 @@ const persistConfig = {
 
 const rootReducer = combineReducers({
   profile: profileReducer,
-  messages: messagesReducer
+  messages: messagesReducer,
+  gallirey: gallireyReducer
 })
 
 const persistedReducer = persistReducer(persistConfig, rootReducer)

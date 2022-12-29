@@ -11,6 +11,7 @@ import { useState } from 'react'
 import { defaultContext, ThemeContext } from './utils/ThemeContext'
 import { Provider } from 'react-redux'
 import { store, persistor } from './store'
+import { GallireyPage } from './pages/Gallirey'
 
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -65,6 +66,7 @@ export function App () {
                   element={<ChatsPage />}
                 />
               </Route>
+              <Route path="chakmems" element={<GallireyPage />} />
             </Route>
 
             <Route path="*" element={<h2>404 Page not FOUND</h2>} />
@@ -76,3 +78,5 @@ export function App () {
     </>
   )
 }
+
+// Api key LWbYMVy4JcmBDSXPJr5CcRD7DktYVeqeRgxIt6vH

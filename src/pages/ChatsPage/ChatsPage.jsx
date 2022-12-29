@@ -13,40 +13,13 @@ import styles from './ChatsPage.module.css'
 
 
 export function ChatsPage () {
-  // const [messages, setMessages] = useState([])
+ 
   const {chatId} = useParams()
   const messages = useSelector(selectMessage)
+  console.log(messages)
 
   const MessageListWithClass = WithClasses(MessageList)
 
-  // const addMessage = (newMessage) => {
-  //   console.log('newMessage', newMessage);
-  //   setMessages([...messages, newMessage])
-  // }
-
-  // useEffect(() => {
-  //   if (chatId && 
-  //       messages[chatId]?.length > 0 && 
-  //       messages[chatId][messages[chatId].length - 1].author === AUTHOR.user
-  //     ) {
-  //     const timeout = setTimeout(() => {
-  //       onAddMessage(chatId, {
-  //         author: AUTHOR.bot,
-  //         text: 'Im BOT'
-  //       })
-  //     }, 1500)
-
-  //     return () => {
-  //       clearTimeout(timeout)
-  //     }
-  //   }
-  // }, [chatId, messages])
-
-  // const handleAddMessage = (massage) => {
-  //   if (chatId) {
-  //     onAddMessage(chatId, massage)
-  //   }
-  // }
 
   if(chatId && !messages[chatId]) {
     return <Navigate to="/chats" replace />
@@ -56,7 +29,6 @@ export function ChatsPage () {
     <>
       <h1>Welcome to chat!</h1>
       <ChatList />
-      {/* <MessageList messages={chatId ? messages[chatId] : []} /> */}
       <MessageListWithClass 
         messages={chatId ? messages[chatId] : []}
         classes={styles.border}
