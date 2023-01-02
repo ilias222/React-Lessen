@@ -1,38 +1,107 @@
-import { useState, useEffect } from 'react'
-import { Form as FormFunc } from './components/func/Form'
-import './css/style.css'
+import { Routes, Route } from 'react-router-dom'
+// import { Provider } from 'react-redux'
+import { useDispatch } from 'react-redux'
+import { useEffect, useState } from 'react'
+import { PersistGate } from 'redux-persist/integration/react'
+import { nanoid } from 'nanoid'
+
+import { defaultContext, ThemeContext } from './utils/ThemeContext'
+import { store, persistor } from './store'
+import { auth } from './store/profile/actions'
+import { firebaseAuth, messagesRef } from './services/firebase'
+import { onValue } from "firebase/database";
+
+import { Header } from './components/Header/Header'
+import { MainPage } from './pages/MainPage'
+import { ProfilePage } from './pages/ProfilePage'
+import { AboutWithConnect } from './pages/AboutPage'
+import { ChatsPage } from './pages/ChatsPage/ChatsPage'
+import { ChatList } from './components/ChatList/ChatList'
+import { Articles } from './pages/Articles'
+import { SingIn } from './pages/SingIn'
+import { SignUp } from './pages/SignUp'
+import { PrivateRoute } from './utils/PriviteRoute'
+import { PublicRoute } from './utils/PublicRoute'
 
 export function App () {
-  const [messageList, setMessageList] = useState([{autor: '', date: '', text: ''}])
-  const ret = document.querySelector('p')
+  const dispatch = useDispatch()
 
-    const setUser = (nam, dat, imag, textet) =>{
-      setMessageList([{autor: nam, date: dat, text: textet}])}
-      
-useEffect(() => {
-console.log("App did mounted")
-if(messageList[0].autor){
-  ret.insertAdjacentHTML('beforeend', messageList.map( (item) => 
-  ('<div class="use_widdow">' + '<p class="dia">' + '<span class="title_use">' 
-  + item.autor +' ' + item.date + '</span>' + '<br class="br_use"/>' 
-  + item.text + '</p>' +'</div>')).join(" "))
-  
-  setTimeout(() =>{
-    ret.insertAdjacentHTML('beforeend', `<div class="robo_window"> <p class="robo_win"> 
-    <span class ="title_robo">Administrator ${messageList[0].date} </span> 
-    <br>Ваш запрос обрабатывается.</p></div> `)
-  }, 5000)  
-}
-}, [messageList])
+  const [theme, setTheme] = useState(defaultContext.theme)
+
+  const [messageDB, setMessageDB] = useState({})
+  const [chats, setChats] = useState([])
+
+  const toggleTheme = () => {
+    setTheme(theme === 'light' ? 'dark' : 'light')
+  }
+
+  useEffect(() => {
+    const unsubscribe = firebaseAuth.onAuthStateChanged((user) => {
+      if (user) {
+        dispatch(auth(true))
+      } else {
+        dispatch(auth(false))
+      }
+    })
+    return unsubscribe
+  }, [])
+
+  useEffect(() => {
+    onValue(messagesRef, (snapshot) => {
+      const data = snapshot.val()
+      console.log('snapshot', data)
+
+      const newChats = Object.entries(data).map((item) => ({
+        name: item[0],
+        message: item[1].messageList
+      }))
+      console.log(newChats)
+
+      setMessageDB(data)
+      setChats(newChats)
+    })
+  }, [])
 
   return (
-    <div className='full_window'>
-    <div className='windo'>
-      <p></p>
-    </div>
-      <FormFunc setUserVith ={setUser} setList = {messageList}/>
-    </div>
+    <>
+      {/* <Provider store={store}> */}
+      <PersistGate persistor={persistor}>
+        <ThemeContext.Provider value={{
+          theme,
+          toggleTheme
+        }}>
+          <Routes>
+            <Route path='/' element={<Header />}>
+              <Route index element={<MainPage />} />
+              <Route path="profile" element={<ProfilePage />} />
+              <Route path="about" element={<AboutWithConnect />} />
+              {/* <Route path="chats">
+                  <Route index element={<ChatList />} />
+                  <Route
+                    path=":chatId"
+                    element={<ChatsPage />}
+                  />
+                </Route> */}
+              <Route path="chats" element={<PrivateRoute />}>
+                <Route
+                  index
+                  element={<ChatList chats={chats} messageDB={messageDB} />}
+                />
+                <Route
+                  path=":chatId"
+                  element={<ChatsPage chats={chats} messageDB={messageDB} />}
+                />
+              </Route>
+              <Route path="articles" element={<Articles />} />
+              <Route path="signin" element={<PublicRoute component={<SingIn />} />} />
+              <Route path="signup" element={<SignUp />} />
+            </Route>
+
+            <Route path="*" element={<h2>404 Page not FOUND</h2>} />
+          </Routes>
+        </ThemeContext.Provider>
+      </PersistGate>
+      {/* </Provider> */}
+    </>
   )
 }
-
-// export default App
