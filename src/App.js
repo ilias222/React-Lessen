@@ -1,56 +1,71 @@
 import { Routes, Route } from 'react-router-dom'
-import { nanoid } from 'nanoid'
+// import { Provider } from 'react-redux'
+import { useDispatch } from 'react-redux'
+import { useEffect, useState } from 'react'
 import { PersistGate } from 'redux-persist/integration/react'
+import { nanoid } from 'nanoid'
+
+import { defaultContext, ThemeContext } from './utils/ThemeContext'
+import { store, persistor } from './store'
+import { auth } from './store/profile/actions'
+import { firebaseAuth, messagesRef } from './services/firebase'
+import { onValue } from "firebase/database";
 
 import { Header } from './components/Header/Header'
 import { MainPage } from './pages/MainPage'
 import { ProfilePage } from './pages/ProfilePage'
+import { AboutWithConnect } from './pages/AboutPage'
 import { ChatsPage } from './pages/ChatsPage/ChatsPage'
 import { ChatList } from './components/ChatList/ChatList'
-import { useState } from 'react'
-import { defaultContext, ThemeContext } from './utils/ThemeContext'
-import { Provider } from 'react-redux'
-import { store, persistor } from './store'
-import { GallireyPage } from './pages/Gallirey'
-
-import { ThemeProvider, createTheme } from '@mui/material/styles';
-import CssBaseline from '@mui/material/CssBaseline';
-
-const degaultMessges = {
-  default: [
-    {
-      author: 'user',
-      text: 'one text'
-    },
-    {
-      author: 'user',
-      text: 'two text'
-    },
-  ]
-}
+import { Articles } from './pages/Articles'
+import { SingIn } from './pages/SingIn'
+import { SignUp } from './pages/SignUp'
+import { PrivateRoute } from './utils/PriviteRoute'
+import { PublicRoute } from './utils/PublicRoute'
 
 export function App () {
-  const [messages, setMessages] = useState(degaultMessges)
+  const dispatch = useDispatch()
+
   const [theme, setTheme] = useState(defaultContext.theme)
 
+  const [messageDB, setMessageDB] = useState({})
+  const [chats, setChats] = useState([])
 
   const toggleTheme = () => {
     setTheme(theme === 'light' ? 'dark' : 'light')
   }
 
-  const darkTheme = createTheme({
-    palette: {
-      mode: 'dark',
-    },
-  })
+  useEffect(() => {
+    const unsubscribe = firebaseAuth.onAuthStateChanged((user) => {
+      if (user) {
+        dispatch(auth(true))
+      } else {
+        dispatch(auth(false))
+      }
+    })
+    return unsubscribe
+  }, [])
+
+  useEffect(() => {
+    onValue(messagesRef, (snapshot) => {
+      const data = snapshot.val()
+      console.log('snapshot', data)
+
+      const newChats = Object.entries(data).map((item) => ({
+        name: item[0],
+        message: item[1].messageList
+      }))
+      console.log(newChats)
+
+      setMessageDB(data)
+      setChats(newChats)
+    })
+  }, [])
 
   return (
     <>
-      {/* <Header /> */}
-      <Provider store={store}>
-        <PersistGate persistor={persistor}>
-      <ThemeProvider theme={darkTheme}>
-      <CssBaseline />
+      {/* <Provider store={store}> */}
+      <PersistGate persistor={persistor}>
         <ThemeContext.Provider value={{
           theme,
           toggleTheme
@@ -59,24 +74,34 @@ export function App () {
             <Route path='/' element={<Header />}>
               <Route index element={<MainPage />} />
               <Route path="profile" element={<ProfilePage />} />
-              <Route path="chats">
-                <Route index element={<ChatList />} />
+              <Route path="about" element={<AboutWithConnect />} />
+              {/* <Route path="chats">
+                  <Route index element={<ChatList />} />
+                  <Route
+                    path=":chatId"
+                    element={<ChatsPage />}
+                  />
+                </Route> */}
+              <Route path="chats" element={<PrivateRoute />}>
+                <Route
+                  index
+                  element={<ChatList chats={chats} messageDB={messageDB} />}
+                />
                 <Route
                   path=":chatId"
-                  element={<ChatsPage />}
+                  element={<ChatsPage chats={chats} messageDB={messageDB} />}
                 />
               </Route>
-              <Route path="chakmems" element={<GallireyPage />} />
+              <Route path="articles" element={<Articles />} />
+              <Route path="signin" element={<PublicRoute component={<SingIn />} />} />
+              <Route path="signup" element={<SignUp />} />
             </Route>
 
             <Route path="*" element={<h2>404 Page not FOUND</h2>} />
           </Routes>
         </ThemeContext.Provider>
-        </ThemeProvider>
-        </PersistGate>
-      </Provider>
+      </PersistGate>
+      {/* </Provider> */}
     </>
   )
 }
-
-// Api key LWbYMVy4JcmBDSXPJr5CcRD7DktYVeqeRgxIt6vH

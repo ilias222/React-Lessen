@@ -1,7 +1,8 @@
+import { AUTHOR } from '../../constants'
+
 export const ADD_CHAT = 'ADD_CHAT'
 export const DELETE_CHAT = 'DELETE_CHAT'
 export const ADD_MESSAGE = 'ADD_MESSAGE'
-export const ADD_MESSAGE_BOT = 'ADD_MESSAGE_BOT'
 
 
 export const addChat = (newChat) => ({
@@ -14,15 +15,25 @@ export const deleteChat = (chatName) => ({
   payload: chatName
 })
 
-export const addMessage = (chatName, text, name) => ({
+export const addMessage = (chatName, text) => ({
   type: ADD_MESSAGE,
-  payload: {chatName, text, name}
+  payload: { chatName, text }
 })
-let botTimes
- export const thunk = (chatName, text, message) => (dispath) => {
-   dispath(addMessage(chatName, text, message))
-   if (message !== 'bot'){
-    clearTimeout(botTimes)
-     botTimes = setTimeout(() => {dispath(addMessage(chatName, text = 'Я сдесь', message = 'bot'))}, 3000)
-   } 
- }
+
+let timeout
+export const addMessageWithReply = (chatName, message) => (dispatch) => {
+  dispatch(addMessage(chatName, message))
+
+  if (message.author !== AUTHOR.bot) {
+    if (timeout) {
+      clearTimeout(timeout)
+    }
+
+    timeout = setTimeout(() => {
+      dispatch(addMessage(chatName, {
+        author: AUTHOR.bot,
+        text: 'Im bot'
+      }))
+    }, 1000)
+  }
+}
