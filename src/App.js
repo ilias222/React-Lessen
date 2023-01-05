@@ -1,38 +1,107 @@
-import { useState, useEffect } from 'react'
-import { Form as FormFunc } from './components/func/Form'
-import './css/style.css'
+import { Routes, Route } from 'react-router-dom'
+import { PersistGate } from 'redux-persist/integration/react'
+
+import { Header } from './components/Header/Header'
+import { MainPage } from './pages/MainPage'
+import { ProfilePage } from './pages/ProfilePage'
+import { ChatsPage } from './pages/ChatsPage/ChatsPage'
+import { ChatList } from './components/ChatList/ChatList'
+import { useEffect, useState } from 'react'
+import { defaultContext, ThemeContext } from './utils/ThemeContext'
+import { useDispatch } from 'react-redux'
+import { persistor } from './store'
+import { GallireyPage } from './pages/Gallirey'
+import { SingReg } from './pages/SingReg'
+import { SingUp } from './pages/SingUp'
+
+import { firebaseAuth, messageRef } from './services/firebase'
+
+import { ThemeProvider, createTheme } from '@mui/material/styles';
+import CssBaseline from '@mui/material/CssBaseline';
+import { PrivateRoutes } from './HOC/private'
+import { auch } from './store/profile/actions'
+import { onValue } from 'firebase/database'
+
+const degaultMessges = {
+  default: [
+    {
+      author: 'user',
+      text: 'one text'
+    },
+    {
+      author: 'user',
+      text: 'two text'
+    },
+  ]
+}
 
 export function App () {
-  const [messageList, setMessageList] = useState([{autor: '', date: '', text: ''}])
-  const ret = document.querySelector('p')
+  const [messages, setMessages] = useState(degaultMessges)
+  const [theme, setTheme] = useState(defaultContext.theme)
+  const [messageDB, setMessageDB] = useState({})
+  const dispatch = useDispatch()
 
-    const setUser = (nam, dat, imag, textet) =>{
-      setMessageList([{autor: nam, date: dat, text: textet}])}
-      
-useEffect(() => {
-console.log("App did mounted")
-if(messageList[0].autor){
-  ret.insertAdjacentHTML('beforeend', messageList.map( (item) => 
-  ('<div class="use_widdow">' + '<p class="dia">' + '<span class="title_use">' 
-  + item.autor +' ' + item.date + '</span>' + '<br class="br_use"/>' 
-  + item.text + '</p>' +'</div>')).join(" "))
-  
-  setTimeout(() =>{
-    ret.insertAdjacentHTML('beforeend', `<div class="robo_window"> <p class="robo_win"> 
-    <span class ="title_robo">Administrator ${messageList[0].date} </span> 
-    <br>Ваш запрос обрабатывается.</p></div> `)
-  }, 5000)  
-}
-}, [messageList])
+  useEffect(() =>{
+ const onuse = firebaseAuth.onAuthStateChanged((user)=>{
+  if(user){
+    dispatch(auch(true))
+  } else{
+    dispatch(auch(false))
+  }
+ })
+ return onuse
+  }, [])
+
+  useEffect(() =>{
+    onValue(messageRef, (snapshot) => {
+      const data = snapshot.val()
+      setMessageDB(data)
+      console.log(messageDB)
+    })
+  }, [])
+
+  const toggleTheme = () => {
+    setTheme(theme === 'light' ? 'dark' : 'light')
+  }
+
+  const darkTheme = createTheme({
+    palette: {
+      mode: 'dark',
+    },
+  })
 
   return (
-    <div className='full_window'>
-    <div className='windo'>
-      <p></p>
-    </div>
-      <FormFunc setUserVith ={setUser} setList = {messageList}/>
-    </div>
+    <>
+      {/* <Header /> */}
+        <PersistGate persistor={persistor}>
+      <ThemeProvider theme={darkTheme}>
+      <CssBaseline />
+        <ThemeContext.Provider value={{
+          theme,
+          toggleTheme
+        }}>
+          <Routes>
+            <Route path='/' element={<Header />}>
+              <Route index element={<MainPage />} />
+              <Route path="profile" element={<ProfilePage />} />
+              <Route path="chats" element={<PrivateRoutes/>}>
+              <Route index element={<ChatList messageDB={messageDB} />} />
+              <Route
+                path=":chatId"
+                element={<ChatsPage />}
+              />
+            </Route>
+              <Route path="chakmems" element={<GallireyPage />} />
+              <Route path="singup" element={<SingUp />} />
+              <Route path="singreg" element={<SingReg />} />
+            </Route>
+            <Route path="*" element={<h2>404 Page not FOUND</h2>} />
+          </Routes>
+        </ThemeContext.Provider>
+        </ThemeProvider>
+        </PersistGate>
+    </>
   )
 }
 
-// export default App
+// Api key LWbYMVy4JcmBDSXPJr5CcRD7DktYVeqeRgxIt6vH

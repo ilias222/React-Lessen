@@ -1,0 +1,3 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`testing gallireyReducer returns state with status loading after requestArticles action 1`] = `null`;
